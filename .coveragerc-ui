@@ -1,0 +1,42 @@
+[coverage:run]
+source = ui,tests_ui
+omit = 
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */venv/*
+    */.venv/*
+    */env/*
+    */.env/*
+    ui/__main__.py
+    tests_ui/conftest.py
+    tests_ui/utils/__init__.py
+    tests_ui/integration/__init__.py
+    tests_ui/e2e/__init__.py
+
+[coverage:report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
+    except ImportError:
+    pass  # cov: ignore
+
+precision = 2
+show_missing = true
+skip_covered = false
+sort = Cover
+
+[coverage:html]
+directory = htmlcov_ui
+title = Minesweeper UI Test Coverage
+
+[coverage:xml]
+output = coverage_ui.xml
