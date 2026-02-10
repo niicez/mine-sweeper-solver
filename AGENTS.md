@@ -4,70 +4,92 @@ Guidelines for AI agents working on this codebase.
 
 ## Commands
 
-### Testing
+### Testing (Single Test)
 ```bash
 # Run all tests
-python -m pytest test_minesweeper_solver.py -v
+python -m pytest tests/ -v
+python -m pytest tests_ui/ -v
 
-# Run a single test class
-python -m pytest test_minesweeper_solver.py::TestMinesweeperSolver -v
+# Run single test file
+python -m pytest tests/test_minesweeper_solver.py -v
+python -m pytest tests_ui/integration/test_board_editor.py -v
 
-# Run a single test method
-python -m pytest test_minesweeper_solver.py::TestMinesweeperSolver::test_solver_basic_mine -v
+# Run single test class
+python -m pytest tests/test_minesweeper_solver.py::TestMinesweeperSolver -v
 
-# Run tests matching a pattern
-python -m pytest test_minesweeper_solver.py -k "stress" -v
+# Run single test method
+python -m pytest tests/test_minesweeper_solver.py::TestMinesweeperSolver::test_solver_basic_mine -v
 
-# Run with coverage (if pytest-cov installed)
-python -m pytest test_minesweeper_solver.py --cov=minesweeper_solver --cov-report=html
+# Run tests matching pattern
+python -m pytest tests/ -k "stress" -v
+
+# Run with coverage
+python -m pytest tests/ --cov=src --cov-report=html
+
+# Run UI tests headless
+HEADLESS=true python -m pytest tests_ui/ -v
 ```
 
 ### Linting & Formatting
 ```bash
-# Format with ruff (preferred)
-ruff format minesweeper_solver.py test_minesweeper_solver.py example.py
+# Format with Black
+black src/ ui/ tests/ tests_ui/ example.py main.py
 
-# Check with ruff
-ruff check minesweeper_solver.py test_minesweeper_solver.py example.py
+# Check with Black
+black --check src/ ui/ tests/ tests_ui/ example.py main.py
 
-# Fix auto-fixable issues
-ruff check --fix minesweeper_solver.py test_minesweeper_solver.py example.py
+# Run Ruff with auto-fix
+ruff check --fix src/ ui/ tests/ tests_ui/ example.py main.py
 
-# Alternative: Format with black
-black minesweeper_solver.py test_minesweeper_solver.py example.py
+# Check Ruff
+ruff check src/ ui/ tests/ tests_ui/ example.py main.py
+
+# Run all checks
+./scripts/lint.sh all        # Unix
+scripts\lint.bat all         # Windows
 ```
 
-### Running the Example
+### Pre-commit & Application
 ```bash
+# Install hooks
+pre-commit install
+
+# Run on all files
+pre-commit run --all-files
+
+# Run CLI examples
 python example.py
+
+# Run GUI
+python main.py
 ```
 
 ## Code Style Guidelines
 
 ### General
-- **Python Version**: 3.8+ (uses standard library only, no external dependencies)
-- **Line Length**: 100 characters max
+- **Python Version**: 3.11+ (uses modern typing features)
+- **Line Length**: 88 characters (Black default)
 - **Indentation**: 4 spaces (no tabs)
-- **Quotes**: Double quotes for strings, single quotes acceptable for single characters
+- **Quotes**: Double quotes for strings
 
 ### Imports
 ```python
-# Standard library imports grouped and sorted
-from __future__ import annotations  # Always first
+from __future__ import annotations
 
 import itertools
 import random
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Set, Tuple, Optional, FrozenSet
+from typing import Dict, List, Optional
 
-# No external dependencies allowed - use only standard library
+# Use modern built-in generics
+def process(items: list[str]) -> dict[str, int]: ...
 ```
 
 ### Type Hints
 - Use type hints for all function signatures
-- Use `Optional[X]` for nullable types (not `X | None` for Python 3.8 compatibility)
-- Use built-in generics: `list[X]`, `dict[X, Y]` requires Python 3.9+, else use `List[X]`, `Dict[X, Y]`
+- Use `X | None` for nullable types (Python 3.11+)
+- Use built-in generics: `list[X]`, `dict[X, Y]`
 - Return type `-> None` for procedures
 
 ```python
@@ -75,35 +97,34 @@ def solve(self, board: MinesweeperBoard) -> SolverResult:
     """Solve the board and return results."""
     ...
 
-def get_number(self, pos: Position) -> int:
-    """Get number value, -1 if not a number."""
+def find_safe(self, cells: list[Position]) -> set[Position]:
+    """Find safe cells."""
     ...
 ```
 
 ### Naming Conventions
-- **Classes**: `PascalCase` (e.g., `MinesweeperSolver`, `CellState`)
-- **Functions/Methods**: `snake_case` (e.g., `solve`, `get_number`)
-- **Variables**: `snake_case` (e.g., `mine_count`, `safe_cells`)
-- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_COMBINATIONS`)
+- **Classes**: `PascalCase` (e.g., `MinesweeperSolver`)
+- **Functions/Methods**: `snake_case` (e.g., `solve_board`)
+- **Variables**: `snake_case` (e.g., `mine_count`)
+- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_DEPTH`)
 - **Private**: Prefix with underscore `_private_method`
 
 ### Documentation
 ```python
-def function_name(param: str) -> int:
-    """One-line description.
-    
-    More detailed explanation if needed.
+def analyze_move(self, board: Board, pos: Position) -> str:
+    """Analyze a move and return feedback.
     
     Args:
-        param: Description of parameter
+        board: Current board state
+        pos: Position that was clicked
         
     Returns:
-        Description of return value
+        Analysis message explaining the move quality
         
     Raises:
-        ValueError: When input is invalid
+        ValueError: If position is out of bounds
     """
-    pass
+    ...
 ```
 
 ### Error Handling
@@ -112,18 +133,13 @@ def function_name(param: str) -> int:
 - Handle edge cases explicitly
 
 ```python
-# Good
-def set(self, pos: Position, state: CellState) -> None:
+def set_cell(self, pos: Position, state: CellState) -> None:
     if not (0 <= pos.row < self.rows and 0 <= pos.col < self.cols):
         raise ValueError(f"Position {pos} out of bounds")
     self.grid[pos.row][pos.col] = state
 ```
 
 ### Dataclasses
-- Use `@dataclass(frozen=True)` for immutable value types
-- Use `@dataclass` for mutable entities
-- Use `field(default_factory=list)` for mutable defaults
-
 ```python
 @dataclass(frozen=True)
 class Position:
@@ -132,20 +148,19 @@ class Position:
 
 @dataclass
 class SolverResult:
-    safe_cells: Set[Position] = field(default_factory=set)
+    safe_cells: set[Position] = field(default_factory=set)
 ```
 
 ### Testing
 - Use `unittest` framework with `pytest` runner
 - Test class names: `TestPascalCase`
 - Test method names: `test_snake_case_descriptive`
-- One assertion per test, or group related assertions
-- Use descriptive docstrings explaining what is tested
+- One assertion per test or group related assertions
 
 ```python
 class TestMinesweeperSolver(unittest.TestCase):
     def test_solver_finds_guaranteed_mines(self):
-        """Test that solver correctly identifies cells that must be mines."""
+        """Test solver correctly identifies cells that must be mines."""
         board = create_test_board()
         result = self.solver.solve(board)
         self.assertIn(Position(0, 1), result.mines)
@@ -157,35 +172,34 @@ class TestMinesweeperSolver(unittest.TestCase):
 - Group related methods together
 - Extract complex logic into helper methods
 
-### Performance
-- Profile before optimizing
-- Use generators for large data processing
-- Prefer built-in functions over loops
-- Document complexity in docstrings for algorithms
-
-### Pre-commit Checklist
-Before finishing:
-1. Run tests: `python -m pytest test_minesweeper_solver.py -v`
-2. Format code: `ruff format .` or `black .`
-3. Check for errors: `ruff check .`
-4. Verify type safety (if using mypy): `mypy minesweeper_solver.py`
-5. Run example to verify it works: `python example.py`
-
 ## Project Structure
 
 ```
 mine-sweeper-solver/
-├── minesweeper_solver.py    # Main solver implementation
-├── test_minesweeper_solver.py  # Comprehensive test suite
-├── example.py               # Usage examples and demo
-├── README.md               # User documentation
-└── AGENTS.md              # This file - developer guidelines
+├── src/minesweeper_solver/  # Main solver implementation
+├── ui/                       # GUI (tkinter)
+├── tests/                    # Unit tests
+├── tests_ui/                 # UI integration tests
+├── scripts/                  # Helper scripts
+├── example.py               # Usage examples
+├── main.py                  # Entry point
+└── pyproject.toml          # Project config
 ```
+
+## Pre-commit Checklist
+
+Before finishing:
+1. Run tests: `python -m pytest tests/ tests_ui/ -v`
+2. Format code: `black src/ ui/ tests/ tests_ui/` or `./scripts/lint.sh format`
+3. Check linting: `ruff check .` or `./scripts/lint.sh check`
+4. Run example: `python example.py`
+5. Test GUI if changed: `python main.py`
 
 ## Key Design Principles
 
 1. **Immutability**: Use frozen dataclasses for positions, constraints
 2. **Type Safety**: All public APIs must be typed
-3. **No External Dependencies**: Standard library only
+3. **Standard Library**: Prefer stdlib over external dependencies
 4. **Test Coverage**: All code paths must be testable
 5. **Clear Documentation**: Every public class/function needs docstrings
+6. **Code Quality**: All code must pass Black and Ruff checks
