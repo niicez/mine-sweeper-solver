@@ -9,15 +9,13 @@ from __future__ import annotations
 
 import os
 import sys
-import tkinter as tk
-from typing import Generator
+from typing import Any, Generator
 
 import pytest
 
 # Add source directories to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "ui"))
-
 
 # =============================================================================
 # Session Configuration
@@ -93,7 +91,7 @@ def display_available(is_headless: bool) -> bool:
 
 
 @pytest.fixture(scope="function")
-def tk_root(display_available: bool) -> Generator[tk.Tk, None, None]:
+def tk_root(display_available: bool) -> Generator[Any, None, None]:
     """
     Create a fresh Tk root window for each test.
 
@@ -109,7 +107,14 @@ def tk_root(display_available: bool) -> Generator[tk.Tk, None, None]:
     if not display_available:
         pytest.skip("No display available for GUI testing")
 
-    root = tk.Tk()
+    import tkinter as tk
+
+    try:
+        root = tk.Tk()
+    except Exception as e:
+        # Tcl/Tk not properly configured
+        pytest.skip(f"Tcl/Tk not available: {e}")
+
     root.withdraw()  # Hide window during tests
 
     yield root
@@ -122,7 +127,7 @@ def tk_root(display_available: bool) -> Generator[tk.Tk, None, None]:
 
 
 @pytest.fixture(scope="function")
-def app(tk_root: tk.Tk) -> Generator:
+def app(tk_root: Any) -> Generator:
     """
     Create a fresh MinesweeperBoardEditor instance for each test.
 
@@ -291,7 +296,7 @@ def edge_positions():
 
 
 @pytest.fixture
-def wait_for_idle(tk_root: tk.Tk):
+def wait_for_idle(tk_root: Any):
     """
     Provide a function to wait for GUI to become idle.
 
@@ -312,7 +317,7 @@ def wait_for_idle(tk_root: tk.Tk):
 
 
 @pytest.fixture
-def process_events(tk_root: tk.Tk):
+def process_events(tk_root: Any):
     """
     Provide a function to process pending GUI events.
 
