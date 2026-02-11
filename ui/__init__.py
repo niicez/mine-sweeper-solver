@@ -545,6 +545,9 @@ class MinesweeperBoardEditor:
 
         # Clear solver results when board changes
         self._clear_solver_results()
+        self._update_results(
+            "Ready. Board modified. Solver results cleared. Click 'Solve Board' to re-analyze."
+        )
 
     def _on_canvas_hover(self, event):
         """Handle mouse hover over canvas."""
@@ -573,10 +576,10 @@ class MinesweeperBoardEditor:
             messagebox.showwarning("Warning", "No board to solve")
             return
 
-        self.last_result = self.solver.solve(self.board)
+        # Clear previous visual highlights before running solver
+        self._clear_solver_highlights()
 
-        # Highlight results
-        self._clear_solver_results()
+        self.last_result = self.solver.solve(self.board)
 
         # Highlight safe cells
         for pos in self.last_result.safe_cells:
@@ -647,12 +650,15 @@ class MinesweeperBoardEditor:
 
         self._update_results("\n".join(msg))
 
-    def _clear_solver_results(self):
-        """Clear solver highlighting and probabilities."""
+    def _clear_solver_highlights(self):
+        """Clear solver visual highlights without clearing results."""
         for cell in self.cells.values():
             cell.clear_highlight()
             cell.clear_probability()
 
+    def _clear_solver_results(self):
+        """Clear solver highlighting and results."""
+        self._clear_solver_highlights()
         self.last_result = None
 
     def _get_hint(self):
@@ -661,12 +667,22 @@ class MinesweeperBoardEditor:
             messagebox.showwarning("Warning", "No board to analyze")
             return
 
+        # Run solver first to get results for highlighting
+        self._clear_solver_highlights()
+        self.last_result = self.solver.solve(self.board)
+
+        # Get hint text
         hint = self.analyzer.get_hint(self.board, self.solver)
         self._update_results(f"HINT:\n{hint}")
 
-        # Highlight the suggested cell
-        self._clear_solver_results()
-        self._solve_board()
+        # Highlight safe cells and mines from solver results
+        for pos in self.last_result.safe_cells:
+            if (pos.row, pos.col) in self.cells:
+                self.cells[(pos.row, pos.col)].highlight(CellStyles.COLOR_SAFE)
+
+        for pos in self.last_result.mines:
+            if (pos.row, pos.col) in self.cells:
+                self.cells[(pos.row, pos.col)].highlight(CellStyles.COLOR_MINE)
 
     def _load_from_string(self):
         """Load board from string representation."""

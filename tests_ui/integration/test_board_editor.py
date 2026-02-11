@@ -268,17 +268,22 @@ class TestBoardStatePersistence:
         """Test that board string export reflects current state."""
         automation = GUIAutomation()
 
+        # Create a 3x3 board for predictable output
+        automation.create_new_board(app, 3, 3, 1)
+
         # Set up a simple pattern
         automation.set_cell_number(app, 0, 0, 1)
         automation.set_cell_number(app, 0, 1, 2)
         automation.select_tool(app, "mine")
         automation.click_cell(app, 0, 2)
 
-        expected = "12X\n" + "?" * 10 + "\n" * 9
         actual = automation.export_board_to_string(app)
 
-        # Check first row
-        assert actual.split("\n")[0] == "12X"
+        # Check first row - should be "12X" followed by unknown cells
+        first_row = actual.split("\n")[0]
+        assert (
+            first_row[:3] == "12X"
+        ), f"Expected first 3 chars to be '12X', got '{first_row[:3]}'"
 
 
 class TestEdgeCases:

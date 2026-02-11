@@ -322,6 +322,8 @@ class GUIAutomation:
             app: MinesweeperBoardEditor instance
         """
         app._clear_solver_results()
+        # Reset results text to initial state for testing
+        app._update_results("Ready. Create a board and click 'Solve Board' to analyze.")
         app.root.update_idletasks()
         self._sleep()
 
@@ -367,20 +369,20 @@ class GUIAutomation:
         from minesweeper_solver import MinesweeperBoard
 
         board = MinesweeperBoard.from_string(board_str, total_mines)
-        app.board = board
-        app.rows = board.rows
-        app.cols = board.cols
-        app.total_mines = total_mines
 
-        # Update UI variables
+        # Update UI variables first
         app.rows_var.set(str(board.rows))
         app.cols_var.set(str(board.cols))
         app.mines_var.set(str(total_mines))
 
-        # Recreate board display
+        # Recreate board display (this will use the updated variables)
         app._create_new_board()
 
-        # Apply loaded state
+        # Restore the loaded board state (since _create_new_board overwrites it)
+        app.board = board
+        app.total_mines = total_mines
+
+        # Apply loaded state to cell displays
         for (row, col), cell in app.cells.items():
             from minesweeper_solver import Position
 

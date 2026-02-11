@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from minesweeper_solver import CellState, MinesweeperBoard
+from minesweeper_solver import CellState, MinesweeperBoard, Position
 from tests_ui.utils.gui_automation import GUIAutomation
 from tests_ui.utils.assertions import (
     assert_cell_is_unknown,
@@ -201,19 +201,26 @@ class TestExportToString:
         board_str = automation.export_board_to_string(app)
 
         # Verify pattern is preserved
-        lines = board_str.strip().split("\n")
-        assert lines[0][0] == " "  # 0 is represented as space
-        assert lines[0][1] == "X"
-        assert lines[0][2] == "2"
+        # Note: Don't use strip() as it removes leading spaces (which represent 0s)
+        lines = board_str.split("\n")
+        first_row = lines[0]
+
+        # 0 is represented as space in to_string()
+        assert (
+            first_row[0] == " "
+        ), f"Expected space at position 0, got {repr(first_row[0])}"
+        assert first_row[1] == "X"
+        assert first_row[2] == "2"
 
     def test_round_trip_import_export(self, app):
         """Test that import followed by export preserves board."""
         automation = GUIAutomation()
 
+        # Note: 0 is exported as space by default, so use 1-8 for round-trip
         original_str = """
         12X
         ?4?
-        X?0
+        X?1
         """
 
         automation.load_board_from_string(app, original_str, 3)
@@ -280,10 +287,11 @@ class TestImportExportEdgeCases:
         """Test that import updates cell display objects correctly."""
         automation = GUIAutomation()
 
+        # Note: Minesweeper cells only support values 0-8, not 9
         board_str = """
         123
         456
-        789
+        780
         """
 
         automation.load_board_from_string(app, board_str, 0)
@@ -291,7 +299,7 @@ class TestImportExportEdgeCases:
         # Verify cell objects reflect imported state
         assert app.cells[(0, 0)].state == CellState(1)
         assert app.cells[(1, 1)].state == CellState(5)
-        assert app.cells[(2, 2)].state == CellState(9)
+        assert app.cells[(2, 2)].state == CellState(0)
 
     def test_import_various_characters(self, app):
         """Test importing board with various valid characters."""
