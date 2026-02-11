@@ -79,6 +79,7 @@ class BoardCell:
         self.is_hovered = False
         self.is_probability_cell = False
         self.probability = 0.0
+        self.highlight_color: Optional[str] = None  # Track solver highlight color
 
         # Create canvas items
         self.rect_id: Optional[int] = None
@@ -194,16 +195,21 @@ class BoardCell:
         """Set hover state."""
         self.is_hovered = hovered
         if self.state == CellState.UNKNOWN and self.rect_id is not None:
+            # Don't change color if cell has a solver highlight
+            if self.highlight_color is not None:
+                return
             color = CellStyles.COLOR_HOVER if hovered else CellStyles.COLOR_UNKNOWN
             self.canvas.itemconfig(self.rect_id, fill=color)
 
     def highlight(self, color: str):
         """Temporarily highlight the cell."""
         if self.rect_id is not None:
+            self.highlight_color = color
             self.canvas.itemconfig(self.rect_id, fill=color)
 
     def clear_highlight(self):
         """Remove highlight and restore normal state."""
+        self.highlight_color = None
         self._update_visuals()
 
     def contains(self, x: int, y: int) -> bool:
