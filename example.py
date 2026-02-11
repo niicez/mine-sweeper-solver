@@ -278,9 +278,7 @@ def demo_interactive():
             status = (
                 "SAFE"
                 if pos in result.safe_cells
-                else "MINE"
-                if pos in result.mines
-                else "?"
+                else "MINE" if pos in result.mines else "?"
             )
             print(f"    ({pos.row}, {pos.col}): {prob * 100:.1f}% [{status}]")
 

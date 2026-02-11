@@ -368,6 +368,6 @@ class TestBoardStateValidation:
         for (row, col), cell in app.cells.items():
             board_state = app.board.get(Position(row, col))
             cell_state = cell.state
-            assert board_state == cell_state, (
-                f"Inconsistency at ({row}, {col}): board={board_state}, cell={cell_state}"
-            )
+            assert (
+                board_state == cell_state
+            ), f"Inconsistency at ({row}, {col}): board={board_state}, cell={cell_state}"

@@ -2,66 +2,113 @@
 
 Guidelines for AI agents working on this codebase.
 
-## Commands
+## Quick Start with Poetry
+
+This project uses [Poetry](https://python-poetry.org/) for dependency management and task automation.
+
+### Setup
+
+```bash
+# Install Poetry (if not already installed)
+curl -sSL https://install.python-poetry.org | python3-
+
+# Install dependencies
+poetry install
+
+# Activate shell
+poetry shell
+```
+
+### Running Tasks
+
+Use `poetry poe <task>` to run development tasks (defined in `pyproject.toml`):
+
+```bash
+# Show all available tasks
+poetry poe help
+
+# Run tests
+poetry poe test
+poetry poe test-unit
+poetry poe test-ui
+poetry poe test-cov
+
+# Code quality
+poetry poe format
+poetry poe lint
+poetry poe fix
+
+# Security and spelling
+poetry poe security
+poetry poe spelling
+
+# CI pipeline
+poetry poe ci
+
+# Run application
+poetry poe run
+poetry poe example
+```
+
+## Commands (Manual)
 
 ### Testing (Single Test)
 ```bash
 # Run all tests
-python -m pytest tests/ -v
-python -m pytest tests_ui/ -v
+poetry run pytest tests/ -v
+poetry run pytest tests_ui/ -v
 
 # Run single test file
-python -m pytest tests/test_minesweeper_solver.py -v
-python -m pytest tests_ui/integration/test_board_editor.py -v
+poetry run pytest tests/test_minesweeper_solver.py -v
+poetry run pytest tests_ui/integration/test_board_editor.py -v
 
 # Run single test class
-python -m pytest tests/test_minesweeper_solver.py::TestMinesweeperSolver -v
+poetry run pytest tests/test_minesweeper_solver.py::TestMinesweeperSolver -v
 
 # Run single test method
-python -m pytest tests/test_minesweeper_solver.py::TestMinesweeperSolver::test_solver_basic_mine -v
+poetry run pytest tests/test_minesweeper_solver.py::TestMinesweeperSolver::test_solver_basic_mine -v
 
 # Run tests matching pattern
-python -m pytest tests/ -k "stress" -v
+poetry run pytest tests/ -k "stress" -v
 
 # Run with coverage
-python -m pytest tests/ --cov=src --cov-report=html
+poetry run pytest tests/ --cov=src --cov-report=html
 
 # Run UI tests headless
-HEADLESS=true python -m pytest tests_ui/ -v
+HEADLESS=true poetry run pytest tests_ui/ -v
 ```
 
 ### Linting & Formatting
 ```bash
 # Format with Black
-black src/ ui/ tests/ tests_ui/ example.py main.py
+poetry run black src/ ui/ tests/ tests_ui/ example.py main.py
 
 # Check with Black
-black --check src/ ui/ tests/ tests_ui/ example.py main.py
+poetry run black --check src/ ui/ tests/ tests_ui/ example.py main.py
 
 # Run Ruff with auto-fix
-ruff check --fix src/ ui/ tests/ tests_ui/ example.py main.py
+poetry run ruff check --fix src/ ui/ tests/ tests_ui/ example.py main.py
 
 # Check Ruff
-ruff check src/ ui/ tests/ tests_ui/ example.py main.py
+poetry run ruff check src/ ui/ tests/ tests_ui/ example.py main.py
 
 # Run all checks
-./scripts/lint.sh all        # Unix
-scripts\lint.bat all         # Windows
+poetry poe lint
 ```
 
 ### Pre-commit & Application
 ```bash
 # Install hooks
-pre-commit install
+poetry run pre-commit install
 
 # Run on all files
-pre-commit run --all-files
+poetry run pre-commit run --all-files
 
 # Run CLI examples
-python example.py
+poetry run python example.py
 
 # Run GUI
-python main.py
+poetry run python main.py
 ```
 
 ## Code Style Guidelines
@@ -180,20 +227,19 @@ mine-sweeper-solver/
 ├── ui/                       # GUI (tkinter)
 ├── tests/                    # Unit tests
 ├── tests_ui/                 # UI integration tests
-├── scripts/                  # Helper scripts
 ├── example.py               # Usage examples
 ├── main.py                  # Entry point
-└── pyproject.toml          # Project config
+└── pyproject.toml          # Project config (Poetry)
 ```
 
 ## Pre-commit Checklist
 
 Before finishing:
-1. Run tests: `python -m pytest tests/ tests_ui/ -v`
-2. Format code: `black src/ ui/ tests/ tests_ui/` or `./scripts/lint.sh format`
-3. Check linting: `ruff check .` or `./scripts/lint.sh check`
-4. Run example: `python example.py`
-5. Test GUI if changed: `python main.py`
+1. Run tests: `poetry poe test`
+2. Format code: `poetry poe format`
+3. Check linting: `poetry poe lint`
+4. Run example: `poetry poe example`
+5. Test GUI if changed: `poetry poe run`
 
 ## Key Design Principles
 
