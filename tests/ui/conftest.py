@@ -2,7 +2,7 @@
 Root conftest.py for UI tests.
 
 This file contains session-wide fixtures and configuration for the UI test suite.
-All fixtures here are available to all test files in the tests_ui directory.
+All fixtures here are available to all test files in the tests.ui directory.
 """
 
 from __future__ import annotations

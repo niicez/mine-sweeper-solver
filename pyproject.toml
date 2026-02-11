@@ -203,7 +203,7 @@ extend-select = []
 convention = "google"
 
 [tool.ruff.lint.isort]
-known-first-party = ["minesweeper_solver", "ui", "tests", "tests_ui"]
+known-first-party = ["minesweeper_solver", "ui", "tests", "tests.unit", "tests.ui"]
 known-third-party = ["pytest"]
 
 [tool.ruff.lint.mccabe]
@@ -239,7 +239,17 @@ keep-runtime-typing = true
     "D103",
     "PLR2004",
 ]
-"**/tests_ui/**/*.py" = [
+"**/tests/unit/**/*.py" = [
+    "S101",
+    "ANN001",
+    "ANN201",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "PLR2004",
+]
+"**/tests/ui/**/*.py" = [
     "S101",
     "ANN001",
     "ANN201",
@@ -257,7 +267,7 @@ keep-runtime-typing = true
 # =============================================================================
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = ["tests", "tests_ui"]
+testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
@@ -345,7 +355,7 @@ ignore_missing_imports = true
 follow_imports = "normal"
 
 [[tool.mypy.overrides]]
-module = ["tests.*", "tests_ui.*"]
+module = ["tests.*", "tests.unit.*", "tests.ui.*"]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
@@ -367,24 +377,24 @@ install = "poetry install"
 install-dev = "poetry install --with dev"
 
 # Code Quality
-format = "black src/ ui/ tests/ tests_ui/ example.py main.py"
-format-check = "black --check src/ ui/ tests/ tests_ui/ example.py main.py"
-lint-ruff = "ruff check src/ ui/ tests/ tests_ui/ example.py main.py"
+format = "black src/ ui/ tests/ example.py main.py"
+format-check = "black --check src/ ui/ tests/ example.py main.py"
+lint-ruff = "ruff check src/ ui/ tests/ example.py main.py"
 lint-mypy = "mypy src/ ui/"
 lint = { sequence = ["lint-ruff", "lint-mypy", "format-check"] }
-fix = "ruff check --fix src/ ui/ tests/ tests_ui/ example.py main.py"
+fix = "ruff check --fix src/ ui/ tests/ example.py main.py"
 
 # Security & Spelling
 security = "bandit -r src/ ui/"
-spelling = "codespell src/ ui/ tests/ tests_ui/ --skip='*.pyc,*.pyo,*.egg-info,.git,__pycache__'"
+spelling = "codespell src/ ui/ tests/ --skip='*.pyc,*.pyo,*.egg-info,.git,__pycache__'"
 
 # Testing
-test = "pytest tests/ tests_ui/ -v"
-test-unit = "pytest tests/ -v"
-test-ui = "pytest tests_ui/ -v"
-test-cov = "pytest tests/ tests_ui/ --cov=src --cov=ui --cov-report=html --cov-report=xml --cov-report=term"
-test-ci = { shell = "HEADLESS=true pytest tests/ tests_ui/ -v --tb=short" }
-test-fast = "pytest tests/ tests_ui/ -v -m 'not slow'"
+test = "pytest tests/ -v"
+test-unit = "pytest tests/unit/ -v"
+test-ui = "pytest tests/ui/ -v"
+test-cov = "pytest tests/ --cov=src --cov=ui --cov-report=html --cov-report=xml --cov-report=term"
+test-ci = { shell = "HEADLESS=true pytest tests/ -v --tb=short" }
+test-fast = "pytest tests/ -v -m 'not slow'"
 
 # Pre-commit
 pre-commit-install = "pre-commit install"

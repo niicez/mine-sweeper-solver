@@ -13,8 +13,8 @@ from __future__ import annotations
 import pytest
 
 from minesweeper_solver import CellState
-from tests_ui.utils.gui_automation import GUIAutomation
-from tests_ui.utils.assertions import (
+from tests.ui.utils.gui_automation import GUIAutomation
+from tests.ui.utils.assertions import (
     assert_cell_is_unknown,
     assert_cell_is_mine,
     assert_cell_is_number,
